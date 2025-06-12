@@ -1,16 +1,28 @@
-
+import { useState } from "react"
+import { BrowserRouter,Routes,Route } from "react-router-dom";
+import Header from "./components/UI/Header";
+import About from "./pages/About";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import ChatPage from "./pages/ChatPage";
+import StudyRoom from "./pages/StudyRoom";
 
 function App() {
-  
-
+  const [user,setUser] = useState('1');
   return (
     <>
-      <div className="bg-blue-500 text-white p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12 rounded-2xl shadow-lg w-full sm:w-3/4 md:w-2/3 lg:w-1/2 xl:w-1/3 mx-auto">
-      <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold mb-4">Responsive Tailwind Div</h1>
-      <p className="text-base sm:text-lg">
-        This div adjusts its padding and width based on the screen size. Resize the window to see the effect.
-      </p>
-    </div>    
+    
+    <BrowserRouter>
+      <Header />
+      <Routes>
+        <Route path='/' element={<About />} />
+        <Route path='/login' element={<Login />} />
+        <Route path='/register' element={<Register />} />
+        <Route path="/chat" element={<ChatPage />} />
+        <Route path="/chat/:chatId" element={<ChatPage />} />
+        <Route path='studyroom' element={<StudyRoom/>} />
+      </Routes>
+    </BrowserRouter>
     </>
   )
 }
