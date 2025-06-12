@@ -83,6 +83,21 @@ const StudyRoom = () => {
     <div className="w-screen h-[calc(100vh-64px)] mt-16 bg-gray-950 text-white flex flex-col md:flex-row overflow-hidden">
       {/* Left Side */}
       <div className="w-full md:w-1/2 border-r border-gray-700 flex flex-col p-4 space-y-4 overflow-y-auto">
+        
+        {/* Pomodoro Timer */}
+        <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-between">
+          <div className="text-2xl font-mono">{formatTime(secondsLeft)}</div>
+          <div className="flex gap-2">
+            <button onClick={startTimer} className="bg-green-600 px-3 py-1 rounded">
+              Start
+            </button>
+            <button onClick={resetTimer} className="bg-red-600 px-3 py-1 rounded">
+              Reset
+            </button>
+          </div>
+          <button className='text-gray-300 cursor-pointer hover:text-blue-400 font-medium'>End Session</button>
+        </div>
+
         {/* Top Buttons */}
         <div className="flex gap-4 mb-2">
           <button
@@ -99,19 +114,8 @@ const StudyRoom = () => {
           </button>
         </div>
 
-        {/* Pomodoro Timer */}
-        <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-between">
-          <div className="text-2xl font-mono">{formatTime(secondsLeft)}</div>
-          <div className="flex gap-2">
-            <button onClick={startTimer} className="bg-green-600 px-3 py-1 rounded">
-              Start
-            </button>
-            <button onClick={resetTimer} className="bg-red-600 px-3 py-1 rounded">
-              Reset
-            </button>
-          </div>
-        </div>
-
+        
+        
         {/* Pad Controls */}
         {mode === 'pad' && (
           <div className="flex gap-2">

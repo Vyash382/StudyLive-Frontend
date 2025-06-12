@@ -16,10 +16,7 @@ const fadeIn = {
 };
 
 const About = () => {
-    const navigate = useNavigate();
-  function handleLogin(){
-    navigate('/login')
-  }
+    
   return (
     <div className="w-full bg-gray-900 text-gray-100 pt-20 px-4 pb-16">
       <div className=" mx-auto w-full space-y-24">
@@ -76,7 +73,7 @@ const About = () => {
             About the Developer
           </h2>
           <p className="text-lg leading-relaxed text-gray-300">
-            I'm <strong>Yash Sinha</strong>, a full-stack developer and aspiring IAS officer. With a strong foundation in both programming and analytical thinking, I enjoy building meaningful applications that solve real-world problems.
+            I'm <strong>Yash Sinha</strong>, a full-stack developer. With a strong foundation in both programming and analytical thinking, I enjoy building meaningful applications that solve real-world problems.
           </p>
           <p className="mt-4 text-lg text-gray-300">
             <span className="font-semibold text-white">Technical interests:</span> Real-time systems, collaborative tools, performance optimization, and educational tech.

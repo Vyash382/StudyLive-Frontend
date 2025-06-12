@@ -1,16 +1,33 @@
 import React, { useState } from 'react';
-import { Bell, MessageCircle, Search, Video, Menu, X, LogOut } from 'lucide-react';
+import {
+  Bell,
+  MessageCircle,
+  Search,
+  Video,
+  Menu,
+  X,
+  LogOut,
+  Home,
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import Modal from './Modal';
+import NotificationBox from '../Notifications/NotificationBox';
+
 const Header = () => {
+  const [toShowSearch, setToShowSearch] = useState(false);
+  const [toShowNotifications, setToShowNotifications] = useState(false);
   const [user, setuser] = useState('1');
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
-  function handleLogin(){
-    navigate('/login')
+
+  function handleLogin() {
+    navigate('/login');
   }
-  function handleRegister(){
+
+  function handleRegister() {
     navigate('register');
   }
+
   const handleLogout = () => {
     setuser('0');
     setMenuOpen(false);
@@ -19,39 +36,81 @@ const Header = () => {
   return (
     <header className="w-full shadow-md bg-gray-900 fixed top-0 left-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <div className="text-2xl font-bold text-white">
-          StudyLive
-        </div>
+        <div className="text-2xl font-bold text-white">StudyLive</div>
 
         <div className="hidden md:flex items-center space-x-6 text-gray-300">
           {user === '1' ? (
             <>
-              <button className="hover:text-blue-400">
+              <button
+                className="hover:text-blue-400"
+                onClick={() => navigate('/')}
+              >
+                <Home size={22} />
+              </button>
+
+              <button
+                className="hover:text-blue-400"
+                onClick={() => setToShowSearch((prev) => !prev)}
+              >
                 <Search size={22} />
               </button>
-              <button className="hover:text-blue-400">
-                <Bell size={22} />
-              </button>
-              <button className="hover:text-blue-400">
+              <Modal toShow={toShowSearch} onClose={setToShowSearch} />
+
+              <div className="relative">
+                <button
+                  className="hover:text-blue-400"
+                  onClick={() => setToShowNotifications(true)}
+                >
+                  <Bell size={22} />
+                </button>
+                <NotificationBox
+                  toShow={toShowNotifications}
+                  setToShow={setToShowNotifications}
+                />
+              </div>
+
+              <button
+                className="hover:text-blue-400"
+                onClick={() => navigate('/chat')}
+              >
                 <MessageCircle size={22} />
               </button>
-              <button className="hover:text-blue-400">
+              <button
+                className="hover:text-blue-400"
+                onClick={() => navigate('/studyroom')}
+              >
                 <Video size={22} />
               </button>
-              <button onClick={handleLogout} className="hover:text-red-500 flex items-center gap-1">
+              <button
+                onClick={handleLogout}
+                className="hover:text-red-500 flex items-center gap-1"
+              >
                 <LogOut size={20} /> Logout
               </button>
             </>
           ) : (
             <>
-              <p href="/login" onClick={handleLogin} className="text-gray-300 cursor-pointer hover:text-blue-400 font-medium">Login</p>
-              <p href="/register" onClick={handleRegister} className="text-gray-300 hover:text-blue-400 font-medium cursor-pointer">Register</p>
+              <p
+                onClick={handleLogin}
+                className="text-gray-300 cursor-pointer hover:text-blue-400 font-medium"
+              >
+                Login
+              </p>
+              <p
+                onClick={handleRegister}
+                className="text-gray-300 hover:text-blue-400 font-medium cursor-pointer"
+              >
+                Register
+              </p>
             </>
           )}
         </div>
 
         <div className="md:hidden">
-          <button onClick={() => setMenuOpen(!menuOpen)} className="text-gray-300">
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="text-gray-300"
+          >
             {menuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
@@ -73,14 +132,27 @@ const Header = () => {
               <button className="flex items-center gap-2 hover:text-blue-400">
                 <Video size={20} /> Conference
               </button>
-              <button onClick={handleLogout} className="flex items-center gap-2 hover:text-red-500">
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 hover:text-red-500"
+              >
                 <LogOut size={20} /> Logout
               </button>
             </div>
           ) : (
             <div className="flex flex-col space-y-3">
-              <a href="/login" className="text-gray-300 hover:text-blue-400 font-medium">Login</a>
-              <a href="/register" className="bg-blue-600 text-white px-4 py-2 text-center rounded hover:bg-blue-700 transition">Register</a>
+              <a
+                href="/login"
+                className="text-gray-300 hover:text-blue-400 font-medium"
+              >
+                Login
+              </a>
+              <a
+                href="/register"
+                className="bg-blue-600 text-white px-4 py-2 text-center rounded hover:bg-blue-700 transition"
+              >
+                Register
+              </a>
             </div>
           )}
         </div>
