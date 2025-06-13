@@ -1,21 +1,66 @@
-import React, { useState } from 'react';
+// pages/Login.jsx
+import React, { useState,useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { useRecoilState } from 'recoil';
+import { userAtom } from '../recoils/userAtom';
 
 const Login = () => {
-    const navigate = useNavigate();
-    const [form, setForm] = useState({ email: '', password: '' });
-    function handleRegister(){
-        navigate('/register');
+  const [form, setForm] = useState({ email: '', password: '' });
+  const [user, setUser] = useRecoilState(userAtom);
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (user) {
+      navigate('/');
     }
+  }, [user, navigate]);
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleRegister = () => navigate('/register');
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Login:', form);
-    // Handle login logic here
+    const { email, password } = form;
+
+    try {
+      const loginResponse = await axios.post('http://localhost:5000/api/user/login', {
+        email,
+        password,
+      });
+
+      if (!loginResponse.data.type) {
+        alert(loginResponse.data.message);
+        return;
+      }
+
+      const token = loginResponse.data.token;
+      localStorage.setItem('token', token);
+
+      const detailsResponse = await axios.post(
+        'http://localhost:5000/api/user/getDetails',
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const userData = detailsResponse.data.user;
+      setUser({
+        id: userData.id,
+        email: userData.email,
+      });
+
+      alert('Login Successful');
+      navigate('/');
+    } catch (error) {
+      console.error(error);
+      alert('Login failed. Please try again.');
+    }
   };
 
   return (
@@ -71,9 +116,9 @@ const Login = () => {
 
         <p className="mt-6 text-sm text-gray-400 text-center">
           Don’t have an account?{' '}
-          <p onClick={handleRegister} className="text-blue-400 hover:underline cursor-pointer">
+          <span onClick={handleRegister} className="text-blue-400 hover:underline cursor-pointer">
             Register here
-          </p>
+          </span>
         </p>
       </motion.div>
     </div>

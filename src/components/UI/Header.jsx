@@ -12,11 +12,13 @@ import {
 import { useNavigate } from 'react-router-dom';
 import Modal from './Modal';
 import NotificationBox from '../Notifications/NotificationBox';
+import { useRecoilState } from 'recoil';
+import { userAtom } from '../../recoils/userAtom';
 
 const Header = () => {
   const [toShowSearch, setToShowSearch] = useState(false);
   const [toShowNotifications, setToShowNotifications] = useState(false);
-  const [user, setuser] = useState('1');
+  const [user,setUser] = useRecoilState(userAtom);
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -29,7 +31,8 @@ const Header = () => {
   }
 
   const handleLogout = () => {
-    setuser('0');
+    setUser(null);
+    localStorage.removeItem('token');
     setMenuOpen(false);
   };
 
@@ -39,7 +42,7 @@ const Header = () => {
         <div className="text-2xl font-bold text-white">StudyLive</div>
 
         <div className="hidden md:flex items-center space-x-6 text-gray-300">
-          {user === '1' ? (
+          {user  ? (
             <>
               <button
                 className="hover:text-blue-400"

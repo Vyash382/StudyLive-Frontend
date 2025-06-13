@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useState,useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Menu } from 'lucide-react'; // or use any icon library
+import { useRecoilValue } from 'recoil';
+import { userAtom } from '../recoils/userAtom';
 
 const myUserId = 'me';
 
@@ -30,10 +32,16 @@ const dummyMessages = {
 const ChatPage = () => {
   const { chatId } = useParams();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
+  const user = useRecoilValue(userAtom)
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
   const closeSidebar = () => setSidebarOpen(false);
-
+  const navigate = useNavigate();
+  console.log(user);
+  useEffect(() => {
+    if (!user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
   return (
     <div className="w-screen h-[calc(100vh-64px)] mt-16 bg-gray-950 text-white flex flex-col md:flex-row overflow-hidden relative">
       {/* Mobile Toggle Button */}

@@ -1,11 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useRecoilValue } from 'recoil';
+import { userAtom } from '../recoils/userAtom';
+import axios from 'axios';
 const Register = () => {
+    const user = useRecoilValue(userAtom);
     const navigate = useNavigate();
     function handleLogin(){
         navigate('/login')
     }
+    useEffect(() => {
+    if (user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -21,11 +30,33 @@ const Register = () => {
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Register:', form);
-    // Handle registration logic here
-  };
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const formData = new FormData();
+    formData.append('name', form.name);
+    formData.append('email', form.email);
+    formData.append('password', form.password);
+    formData.append('file', form.profilePhoto); 
+    const response = await axios.post(
+      'http://localhost:5000/api/user/register',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    if(!response.data.type){
+      alert(response.data.message);
+    }
+    alert(response.data.message);
+  } catch (error) {
+    console.error(error);
+    alert("Registration failed");
+  }
+};
+
 
   return (
     <div className="w-screen h-screen bg-gray-950 flex items-center justify-center px-4">
@@ -99,7 +130,7 @@ const Register = () => {
           </div>
 
           <button
-            onClick={handleLogin}
+            onClick={handleSubmit}
             type="submit"
             className="w-full py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold shadow-md transition-all duration-300"
           >

@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ReactSketchCanvas } from 'react-sketch-canvas';
-
+import { useRecoilValue } from 'recoil';
+import { userAtom } from '../recoils/userAtom';
+import { useNavigate } from 'react-router-dom';
 const dummyMessagesInitial = [
   { senderId: 'me', message: 'Hey team!' },
   { senderId: '1', message: 'Hi, ready to begin?' },
@@ -15,7 +17,13 @@ const StudyRoom = () => {
   const [inputMessage, setInputMessage] = useState('');
   const canvasRef = useRef();
   const messagesEndRef = useRef(null);
-
+  const user = useRecoilValue(userAtom);
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
   // Pomodoro Timer
   const [secondsLeft, setSecondsLeft] = useState(25 * 60);
   const [isRunning, setIsRunning] = useState(false);
