@@ -1,48 +1,81 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+import axios from 'axios';
 
-const dummyNotifications = [
-  {
-    id: 1,
-    type: 'accepted',
-    from: 'Alice Johnson',
-    photo: 'https://i.pravatar.cc/150?img=1',
-  },
-  {
-    id: 2,
-    type: 'received',
-    from: 'Bob Smith',
-    photo: 'https://i.pravatar.cc/150?img=2',
-  },
-  {
-    id: 3,
-    type: 'received',
-    from: 'Charlie Davis',
-    photo: 'https://i.pravatar.cc/150?img=3',
-  },
-];
+const NotificationBox = ({ toShow, setToShow }) => {
+  const [notifications, setNotifications] = useState([]);
 
-const NotificationBox = ({ toShow,setToShow }) => {
-  const [notifications, setNotifications] = useState(dummyNotifications);
+  async function fetch_notifications() {
+    try {
+      const response = await axios.post(
+        'http://localhost:5000/api/notifications/getNotifications',
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        }
+      );
+      setNotifications(response.data.results);
+    } catch (err) {
+      console.error('Error fetching notifications:', err);
+    }
+  }
 
-  const handleAccept = (id) => {
-    setNotifications((prev) =>
-      prev.map((notif) =>
-        notif.id === id ? { ...notif, type: 'accepted' } : notif
-      )
-    );
+  useEffect(() => {
+    fetch_notifications();
+  }, []);
+
+  const handleAccept = async (id) => {
+    try {
+      await axios.post(
+        'http://localhost:5000/api/notifications/acceptRequest',
+        { id },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        }
+      );
+
+      setNotifications((prev) =>
+        prev.map((notif) =>
+          notif.id === id ? { ...notif, type: 'friend' } : notif
+        )
+      );
+    } catch (err) {
+      console.error('Error accepting request:', err);
+    }
   };
 
-  const handleReject = (id) => {
-    setNotifications((prev) => prev.filter((notif) => notif.id !== id));
+  const handleReject = async (id) => {
+    try {
+      await axios.post(
+        'http://localhost:5000/api/notifications/rejectRequest',
+        { id },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        }
+      );
+
+      setNotifications((prev) => prev.filter((notif) => notif.id !== id));
+    } catch (err) {
+      console.error('Error rejecting request:', err);
+    }
   };
-  if(!toShow) return null;
+
+  if (!toShow) return null;
+
   return (
     <div className="absolute right-0 mt-2 w-96 bg-gray-800 rounded-xl shadow-lg p-4 z-50">
       <div className="flex justify-between items-center mb-3">
         <h3 className="text-lg font-semibold text-white">Notifications</h3>
         <button
-          onClick={()=>{setToShow(false)}}
+          onClick={() => {
+            setToShow(false);
+          }}
           className="text-gray-400 hover:text-red-500 transition"
         >
           <X size={20} />
@@ -58,27 +91,28 @@ const NotificationBox = ({ toShow,setToShow }) => {
             className="flex items-center justify-between bg-gray-700 rounded-lg p-3 mb-2"
           >
             <div className="flex items-center gap-3">
-              <img
-                src={notif.photo}
-                alt={notif.from}
-                className="w-10 h-10 rounded-full"
-              />
+              <img src={notif.photo} className="w-10 h-10 rounded-full" />
               <div className="text-white text-sm">
-                {notif.type === 'accepted' ? (
+                {notif.type === 1 ? (
                   <p>
-                    <span className="font-medium">{notif.from}</span> accepted
+                    <span className="font-medium">{notif.name}</span> accepted
                     your friend request.
+                  </p>
+                ) : notif.type === 2 ? (
+                  <p>
+                    <span className="font-medium">{notif.name}</span> sent you a
+                    friend request.
                   </p>
                 ) : (
                   <p>
-                    <span className="font-medium">{notif.from}</span> sent you a
-                    friend request.
+                    You and <span className="font-medium">{notif.name}</span>{' '}
+                    are now friends.
                   </p>
                 )}
               </div>
             </div>
 
-            {notif.type === 'received' && (
+            {notif.type === 2 && (
               <div className="flex gap-2">
                 <button
                   onClick={() => handleAccept(notif.id)}

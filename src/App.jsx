@@ -9,7 +9,7 @@ import ChatPage from './pages/ChatPage';
 import StudyRoom from './pages/StudyRoom';
 import { useEffect } from 'react';
 import axios from 'axios';
-
+import { SocketProvider } from './Socket/SocketContext';
 function App() {
   const [user, setUser] = useRecoilState(userAtom);
   console.log(user);
@@ -43,6 +43,7 @@ function App() {
   }, [setUser]);
 
   return (
+    <SocketProvider user={user} >
     <BrowserRouter>
       <Header />
       <Routes>
@@ -54,6 +55,7 @@ function App() {
         <Route path="/studyroom" element={<StudyRoom />} />
       </Routes>
     </BrowserRouter>
+    </SocketProvider>
   );
 }
 
