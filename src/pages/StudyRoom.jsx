@@ -1,15 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ReactSketchCanvas } from 'react-sketch-canvas';
-import { useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { userAtom } from '../recoils/userAtom';
 import { useNavigate } from 'react-router-dom';
+import { roomAtom } from '../recoils/roomAtom';
 const dummyMessagesInitial = [
   { senderId: 'me', message: 'Hey team!' },
   { senderId: '1', message: 'Hi, ready to begin?' },
   { senderId: 'me', message: 'Yes! Let’s do this.' },
 ];
 
-const StudyRoom = () => {
+const StudyRoom = ({roomId,role}) => {
+  const [roomVariables,setRoomVariables] = useRecoilState(roomAtom);
   const [mode, setMode] = useState('pad');
   const [textContent, setTextContent] = useState('');
   const [isEraser, setIsEraser] = useState(false);
@@ -79,7 +81,13 @@ const StudyRoom = () => {
       console.error('Failed to toggle pen:', err);
     }
   };
-
+  const onExit=()=>{
+    const newRoom = {
+      room_id: '',
+      role: ''
+    }
+    setRoomVariables(newRoom);
+  }
   const handleSendMessage = () => {
     if (inputMessage.trim()) {
       setDummyMessages([...dummyMessages, { senderId: 'me', message: inputMessage }]);
@@ -103,7 +111,7 @@ const StudyRoom = () => {
               Reset
             </button>
           </div>
-          <button className='text-gray-300 cursor-pointer hover:text-blue-400 font-medium'>End Session</button>
+          <button className='text-gray-300 cursor-pointer hover:text-blue-400 font-medium' onClick={onExit}>End Session</button>
         </div>
 
         {/* Top Buttons */}

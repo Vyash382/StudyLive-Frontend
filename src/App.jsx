@@ -10,8 +10,12 @@ import StudyRoom from './pages/StudyRoom';
 import { useEffect } from 'react';
 import axios from 'axios';
 import { SocketProvider } from './Socket/SocketContext';
+import { roomAtom } from './recoils/roomAtom';
+import Invitation from './components/RoomMembers/Invititation';
+import InvitationHandler from './components/RoomMembers/InvitationHandler';
 function App() {
   const [user, setUser] = useRecoilState(userAtom);
+  const [roomVariables,setRoomVariables] = useRecoilState(roomAtom);
   console.log(user);
   useEffect(() => {
     const fetchUser = async () => {
@@ -44,7 +48,9 @@ function App() {
 
   return (
     <SocketProvider user={user} >
+    
     <BrowserRouter>
+      <InvitationHandler />
       <Header />
       <Routes>
         <Route path="/" element={<About />} />
@@ -52,7 +58,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/chat/:chatId" element={<ChatPage />} />
-        <Route path="/studyroom" element={<StudyRoom />} />
+        {roomVariables.room_id?<Route path="/studyroom" element={<StudyRoom roomId={roomVariables.room_id} role={roomVariables.role}/>} />:<Route path="/" element={<About />} />}
       </Routes>
     </BrowserRouter>
     </SocketProvider>

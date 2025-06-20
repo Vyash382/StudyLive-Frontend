@@ -1,6 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import Invitation from '../components/RoomMembers/Invititation';
+import { tr } from 'framer-motion/client';
 
 const fadeIn = {
   hidden: { opacity: 0, y: 40 },
@@ -18,7 +20,9 @@ const fadeIn = {
 const About = () => {
     
   return (
+
     <div className="w-full bg-gray-900 text-gray-100 pt-20 px-4 pb-16">
+      
       <div className=" mx-auto w-full space-y-24">
 
         {/* About StudyLive Section */}

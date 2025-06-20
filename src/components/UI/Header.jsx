@@ -14,11 +14,13 @@ import Modal from './Modal';
 import NotificationBox from '../Notifications/NotificationBox';
 import { useRecoilState } from 'recoil';
 import { userAtom } from '../../recoils/userAtom';
+import RoomMembers from '../RoomMembers/RoomMembers';
 
 const Header = () => {
   const [toShowSearch, setToShowSearch] = useState(false);
   const [toShowNotifications, setToShowNotifications] = useState(false);
   const [user,setUser] = useRecoilState(userAtom);
+  const [closeConference,closeHandlerConference] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -80,10 +82,11 @@ const Header = () => {
               </button>
               <button
                 className="hover:text-blue-400"
-                onClick={() => navigate('/studyroom')}
+                onClick={() => closeHandlerConference(!closeConference)}
               >
                 <Video size={22} />
               </button>
+              <RoomMembers close={closeConference} closeHandler={closeHandlerConference} />
               <button
                 onClick={handleLogout}
                 className="hover:text-red-500 flex items-center gap-1"

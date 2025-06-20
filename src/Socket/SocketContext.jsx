@@ -7,7 +7,6 @@ export const useSocket = () => useContext(SocketContext);
 
 export const SocketProvider = ({ user, children }) => {
   const [socket, setSocket] = useState(null);
-  
   useEffect(() => {
     if (!user) {
       if (socket) {
