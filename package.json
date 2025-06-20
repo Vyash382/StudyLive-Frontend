@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@100mslive/react-sdk": "^0.10.35",
     "@tailwindcss/vite": "^4.1.10",
     "axios": "^1.9.0",
     "framer-motion": "^12.17.0",

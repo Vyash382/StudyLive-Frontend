@@ -13,6 +13,7 @@ import { SocketProvider } from './Socket/SocketContext';
 import { roomAtom } from './recoils/roomAtom';
 import Invitation from './components/RoomMembers/Invititation';
 import InvitationHandler from './components/RoomMembers/InvitationHandler';
+import { HMSRoomProvider } from '@100mslive/react-sdk';
 function App() {
   const [user, setUser] = useRecoilState(userAtom);
   const [roomVariables,setRoomVariables] = useRecoilState(roomAtom);
@@ -47,6 +48,7 @@ function App() {
   }, [setUser]);
 
   return (
+    <HMSRoomProvider>
     <SocketProvider user={user} >
     
     <BrowserRouter>
@@ -58,10 +60,11 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/chat/:chatId" element={<ChatPage />} />
-        {roomVariables.room_id?<Route path="/studyroom" element={<StudyRoom roomId={roomVariables.room_id} role={roomVariables.role}/>} />:<Route path="/" element={<About />} />}
+        {roomVariables.room_id?<Route path="/studyroom" element={<StudyRoom />} />:<Route path="/" element={<About />} />}
       </Routes>
     </BrowserRouter>
     </SocketProvider>
+    </HMSRoomProvider>
   );
 }
 

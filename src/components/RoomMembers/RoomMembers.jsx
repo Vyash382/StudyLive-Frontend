@@ -3,13 +3,14 @@ import axios from 'axios';
 import { useRecoilState } from 'recoil';
 import { userAtom } from '../../recoils/userAtom';
 import { useNavigate } from 'react-router-dom';
+import { roomAtom } from '../../recoils/roomAtom';
 
 const RoomMembers = ({ close, closeHandler }) => {
   const navigate = useNavigate()
   const [friends, setFriends] = useState([]);
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [roomName, setRoomName] = useState('');
-  const [room,setRoom] = useRecoilState(userAtom);
+  const [room,setRoom] = useRecoilState(roomAtom);
   useEffect(() => {
     async function get_friends() {
       try {
@@ -58,6 +59,7 @@ const RoomMembers = ({ close, closeHandler }) => {
         role:'host'
     }
     setRoom(newRoom);
+
     navigate('/studyroom')
     closeHandler(false);
   };
