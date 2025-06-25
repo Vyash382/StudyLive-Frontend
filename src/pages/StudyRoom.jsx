@@ -5,6 +5,7 @@ import { userAtom } from '../recoils/userAtom';
 import { useNavigate } from 'react-router-dom';
 import { roomAtom } from '../recoils/roomAtom';
 import axios from 'axios';
+import { useSocket } from '../Socket/SocketContext';
 import {
   useHMSActions,
   useHMSStore,
@@ -19,7 +20,8 @@ const StudyRoom = () => {
   const [isEraser, setIsEraser] = useState(false);
   const [dummyMessages, setDummyMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
-  const [isVideoOn, setIsVideoOn] = useState(true); // ✅ Video toggle
+  const [isVideoOn, setIsVideoOn] = useState(true);
+  const socket = useSocket();
   const canvasRef = useRef();
   const messagesEndRef = useRef(null);
   const user = useRecoilValue(userAtom);
@@ -28,7 +30,6 @@ const StudyRoom = () => {
   const hmsActions = useHMSActions();
   const isConnected = useHMSStore(selectIsConnectedToRoom);
   const peers = useHMSStore(selectPeers);
-
   const [token, setToken] = useState('');
 
   useEffect(() => {
@@ -60,11 +61,39 @@ const StudyRoom = () => {
         authToken: token,
         settings: {
           isAudioMuted: false,
-          isVideoMuted: false, // ✅ Enable video on join
+          isVideoMuted: false,
         },
       });
     }
   }, [token, isConnected, hmsActions, user]);
+
+  useEffect(() => {
+    if (socket && roomVariables.room_id) {
+      socket.emit('join-room', roomVariables.room_id);
+
+      socket.on('receive-drawing', async (data) => {
+        try {
+          await canvasRef.current.loadPaths(data);
+        } catch (err) {
+          console.error('Failed to load drawing:', err);
+        }
+      });
+
+      socket.on('receive-text', (content) => {
+        setTextContent(content);
+      });
+
+      socket.on('send-group-messages', ({ sender, data }) => {
+        setDummyMessages((prev) => [...prev, { senderId: sender, message: data }]);
+      });
+    }
+
+    return () => {
+      socket?.off('receive-drawing');
+      socket?.off('receive-text');
+      socket?.off('send-group-messages');
+    };
+  }, [socket, roomVariables.room_id]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -130,15 +159,45 @@ const StudyRoom = () => {
     }
   };
 
-  const onExit = () => {
+  const onExit = async() => {
+    const len = peers.length;
+    if(len==1){
+      await axios.post('http://localhost:5000/api/gemini/summary',{
+        group_id:roomVariables.group_id,
+        content:textContent
+      });
+    }
     hmsActions.leave();
     setRoomVariables({ room_id: '', role: '' });
   };
 
   const handleSendMessage = () => {
-    if (inputMessage.trim()) {
-      setDummyMessages([...dummyMessages, { senderId: 'me', message: inputMessage }]);
-      setInputMessage('');
+    if (!inputMessage.trim()) return;
+
+    // Emit message to socket server
+    socket.emit('send-group-messages', {
+      roomId: roomVariables.room_id,
+      sender: user.email,
+      data: inputMessage,
+    });
+
+    // Show it optimistically
+    setDummyMessages([...dummyMessages, { senderId: 'me', message: inputMessage }]);
+    setInputMessage('');
+  };
+
+  const handleTextChange = (e) => {
+    const newText = e.target.value;
+    setTextContent(newText);
+    socket.emit('send-text', { roomId: roomVariables.room_id, content: newText });
+  };
+
+  const handleStroke = async () => {
+    try {
+      const paths = await canvasRef.current.exportPaths();
+      socket.emit('send-drawing', { roomId: roomVariables.room_id, data: paths });
+    } catch (err) {
+      console.error('Error exporting drawing paths:', err);
     }
   };
 
@@ -178,23 +237,23 @@ const StudyRoom = () => {
           {isVideoOn ? 'Turn Off Video' : 'Turn On Video'}
         </button>
 
-        <div className="flex-1 bg-gray-800 rounded-lg overflow-hidden">
-          {mode === 'pad' ? (
+        <div className="flex-1 bg-gray-800 rounded-lg overflow-hidden relative">
+          <div className={`absolute top-0 left-0 w-full h-full ${mode === 'pad' ? 'block' : 'hidden'}`}>
             <ReactSketchCanvas
               ref={canvasRef}
+              onStroke={handleStroke}
               style={{ height: '100%', width: '100%' }}
               strokeWidth={4}
               strokeColor="white"
               canvasColor="#1f2937"
             />
-          ) : (
-            <textarea
-              placeholder="Start typing..."
-              value={textContent}
-              onChange={(e) => setTextContent(e.target.value)}
-              className="w-full h-full bg-gray-900 text-white p-4 rounded-lg resize-none outline-none"
-            />
-          )}
+          </div>
+          <textarea
+            placeholder="Start typing..."
+            value={textContent}
+            onChange={handleTextChange}
+            className={`absolute top-0 left-0 w-full h-full bg-gray-900 text-white p-4 rounded-lg resize-none outline-none ${mode === 'write' ? 'block' : 'hidden'}`}
+          />
         </div>
       </div>
 
@@ -209,7 +268,7 @@ const StudyRoom = () => {
                 className={`px-4 py-2 rounded-xl max-w-[80%] ${msg.senderId === 'me' ? 'bg-blue-500 self-end text-white ml-auto' : 'bg-gray-700 self-start'}`}
               >
                 <div className="text-xs mb-1 text-gray-300">
-                  {msg.senderId === 'me' ? 'You' : `User ${msg.senderId}`}
+                  {msg.senderId == user.email ? user.email : msg.senderId}
                 </div>
                 {msg.message}
               </div>

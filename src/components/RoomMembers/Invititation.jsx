@@ -2,18 +2,29 @@ import React from 'react';
 import { useRecoilState } from 'recoil';
 import { roomAtom } from '../../recoils/roomAtom';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
-const Invitation = ({ inviter, roomId, roomName, close, closeHandler }) => {
+const Invitation = ({ inviter, roomId, roomName, close, group_id,closeHandler }) => {
   if (!close) return null;
   const [room,setRoom] = useRecoilState(roomAtom);
   const navigate = useNavigate();
-  const onJoin = () => {
+  const onJoin = async() => {
     const newRoom ={
         room_id:roomId,
         roomName:roomName,
-        role:'guest'
+        role:'guest',
+        group_id
     }
+    const response = await axios.post('http://localhost:5000/api/conference/accept-invitation',{
+      group_id
+    },{
+      headers:{
+        authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+    console.log(response);
     setRoom(newRoom);
+
     navigate('/studyroom')
     closeHandler(false);
   };

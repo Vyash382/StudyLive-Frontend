@@ -42,12 +42,18 @@ const RoomMembers = ({ close, closeHandler }) => {
   const handleSubmit = async() => {
     const response = await axios.post('http://localhost:5000/api/conference/create-room',{
         roomName
+    },{
+      headers:{
+            authorization:`Bearer ${localStorage.getItem('token')}`
+        }
     })
     const roomId = response.data.id;
+    const group_id = response.data.group_id;
     const response2 = await axios.post('http://localhost:5000/api/conference/send-invitation',{
         invitees:selectedMembers,
         roomName,
-        roomId
+        roomId,
+        group_id
     },{
         headers:{
             authorization:`Bearer ${localStorage.getItem('token')}`
@@ -56,7 +62,8 @@ const RoomMembers = ({ close, closeHandler }) => {
     const newRoom ={
         room_id:roomId,
         roomName:roomName,
-        role:'host'
+        role:'host',
+        group_id
     }
     setRoom(newRoom);
 

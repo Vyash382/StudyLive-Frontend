@@ -9,21 +9,21 @@ const InvitationHandler = () => {
   const [invitor,setInvitor] = useState('');
   const [roomId,setRoomId] = useState('');
   const [roomName,setRoomName] = useState(''); 
-  
+  const [group_id,setGroup_id] = useState('');
   useEffect(()=>{
     function handleInvitation(data){
-        const {inviter,roomId,roomName} = data;
+        const {inviter,roomId,roomName,group_id} = data;
         setInvitor(inviter);
         setRoomId(roomId);
         setRoomName(roomName);
+        setGroup_id(group_id);
         closeHandler(true);
-        console.log('aaya');
     }
     socket.on("invitation",handleInvitation);
   },[])
   
   return (
-    <Invitation inviter={invitor} roomId={roomId} roomName={roomName} close={close} closeHandler={closeHandler} />
+    <Invitation inviter={invitor} roomId={roomId} roomName={roomName} close={close} group_id={group_id} closeHandler={closeHandler} />
   )
 }
 
