@@ -8,7 +8,7 @@ const NotificationBox = ({ toShow, setToShow }) => {
   async function fetch_notifications() {
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/notifications/getNotifications',
+        'https://studylive-backend.onrender.com/api/notifications/getNotifications',
         {},
         {
           headers: {
@@ -29,7 +29,7 @@ const NotificationBox = ({ toShow, setToShow }) => {
   const handleAccept = async (id) => {
     try {
       await axios.post(
-        'http://localhost:5000/api/notifications/acceptRequest',
+        'https://studylive-backend.onrender.com/api/notifications/acceptRequest',
         { id },
         {
           headers: {
@@ -51,7 +51,7 @@ const NotificationBox = ({ toShow, setToShow }) => {
   const handleReject = async (id) => {
     try {
       await axios.post(
-        'http://localhost:5000/api/notifications/rejectRequest',
+        'https://studylive-backend.onrender.com/api/notifications/rejectRequest',
         { id },
         {
           headers: {

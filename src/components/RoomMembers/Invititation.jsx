@@ -15,7 +15,7 @@ const Invitation = ({ inviter, roomId, roomName, close, group_id,closeHandler })
         role:'guest',
         group_id
     }
-    const response = await axios.post('http://localhost:5000/api/conference/accept-invitation',{
+    const response = await axios.post('https://studylive-backend.onrender.com/api/conference/accept-invitation',{
       group_id
     },{
       headers:{

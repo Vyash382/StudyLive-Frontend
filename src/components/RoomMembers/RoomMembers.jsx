@@ -15,7 +15,7 @@ const RoomMembers = ({ close, closeHandler }) => {
     async function get_friends() {
       try {
         const response = await axios.post(
-          'http://localhost:5000/api/chat/getFriends',
+          'https://studylive-backend.onrender.com/api/chat/getFriends',
           {},
           {
             headers: {
@@ -40,7 +40,7 @@ const RoomMembers = ({ close, closeHandler }) => {
   };
 
   const handleSubmit = async() => {
-    const response = await axios.post('http://localhost:5000/api/conference/create-room',{
+    const response = await axios.post('https://studylive-backend.onrender.com/api/conference/create-room',{
         roomName
     },{
       headers:{
@@ -49,7 +49,7 @@ const RoomMembers = ({ close, closeHandler }) => {
     })
     const roomId = response.data.id;
     const group_id = response.data.group_id;
-    const response2 = await axios.post('http://localhost:5000/api/conference/send-invitation',{
+    const response2 = await axios.post('https://studylive-backend.onrender.com/api/conference/send-invitation',{
         invitees:selectedMembers,
         roomName,
         roomId,

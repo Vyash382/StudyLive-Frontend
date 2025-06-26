@@ -6,6 +6,7 @@ import { useRecoilValue } from 'recoil';
 import { userAtom } from '../recoils/userAtom';
 import axios from 'axios';
 import { useSocket } from '../Socket/SocketContext';
+import { getCachedMessages, cacheMessages } from './CacheChats';
 
 const ChatPage = () => {
   const user = useRecoilValue(userAtom);
@@ -19,12 +20,18 @@ const ChatPage = () => {
   const { chatId } = useParams();
   const socket = useSocket();
   const messagesEndRef = useRef(null);
-  const audioRef = useRef(null); // Reference to <audio>
+  const audioRef = useRef(null);
 
   async function get_messages(id) {
+    const cached = getCachedMessages(id);
+    if (cached) {
+      setMessages((prev) => ({ ...prev, [id]: cached }));
+      return;
+    }
+
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/chat/getChat',
+        'https://studylive-backend.onrender.com/api/chat/getChat',
         { other_id: id },
         {
           headers: {
@@ -36,6 +43,7 @@ const ChatPage = () => {
         ...prev,
         [id]: response.data.messages,
       }));
+      cacheMessages(id, response.data.messages);
     } catch (err) {
       console.error('Failed to fetch messages:', err);
     }
@@ -47,20 +55,19 @@ const ChatPage = () => {
     const handleNewMessage = (data) => {
       const id = data.sender_id === myUserId ? data.receiver_id : data.sender_id;
 
-      if (data.sender_id !== myUserId) {
-        if (audioRef.current) {
-          audioRef.current.play().catch((err) => console.log('Audio error:', err));
-        }
+      if (data.sender_id !== myUserId && audioRef.current) {
+        audioRef.current.play().catch((err) => console.log('Audio error:', err));
       }
 
-      setMessages((prev) => ({
-        ...prev,
-        [id]: [...(prev[id] || []), data],
-      }));
+      setMessages((prev) => {
+        const updated = [...(prev[id] || []), data];
+        cacheMessages(id, updated);
+        return { ...prev, [id]: updated };
+      });
     };
 
-    socket.on("newMessage", handleNewMessage);
-    return () => socket.off("newMessage", handleNewMessage);
+    socket.on('newMessage', handleNewMessage);
+    return () => socket.off('newMessage', handleNewMessage);
   }, [socket, myUserId]);
 
   useEffect(() => {
@@ -75,7 +82,7 @@ const ChatPage = () => {
     async function get_friends() {
       try {
         const response = await axios.post(
-          'http://localhost:5000/api/chat/getFriends',
+          'https://studylive-backend.onrender.com/api/chat/getFriends',
           {},
           {
             headers: {
@@ -101,15 +108,15 @@ const ChatPage = () => {
   const handleSend = async () => {
     if (!chatId) return;
     const token = localStorage.getItem('token');
+
     try {
       let response;
-
       if (selectedFile) {
         const formData = new FormData();
         formData.append('file', selectedFile);
         formData.append('other_id', chatId);
         response = await axios.post(
-          'http://localhost:5000/api/chat/sendMessage',
+          'https://studylive-backend.onrender.com/api/chat/sendMessage',
           formData,
           {
             headers: {
@@ -120,7 +127,7 @@ const ChatPage = () => {
         );
       } else if (input.trim() !== '') {
         response = await axios.post(
-          'http://localhost:5000/api/chat/sendMessage',
+          'https://studylive-backend.onrender.com/api/chat/sendMessage',
           {
             other_id: chatId,
             content: input,
@@ -133,14 +140,15 @@ const ChatPage = () => {
 
       if (response?.data?.type) {
         const msg = response.data.data;
-        setMessages((prev) => ({
-          ...prev,
-          [chatId]: [...(prev[chatId] || []), {
+        setMessages((prev) => {
+          const updated = [...(prev[chatId] || []), {
             sender_id: msg.sender_id,
             type: msg.type,
             content: msg.content,
-          }],
-        }));
+          }];
+          cacheMessages(chatId, updated);
+          return { ...prev, [chatId]: updated };
+        });
       }
 
       setInput('');
@@ -158,7 +166,6 @@ const ChatPage = () => {
 
   return (
     <div className="w-screen h-[calc(100vh-64px)] mt-16 bg-gray-950 text-white flex flex-col md:flex-row overflow-hidden relative">
-      {/* 🔊 Audio for notifications */}
       <audio ref={audioRef} src="/notifications.mp3" preload="auto" />
 
       <button

@@ -106,17 +106,17 @@ const About = () => {
           <div className="mt-4 space-y-2 text-gray-300">
             <p>
               <span className="font-medium text-white">Email:</span>{' '}
-              <span className="transition-all hover:text-blue-400">yashsinha382@gmail.com</span>
+              <span className="transition-all hover:text-blue-400">vyash382@gmail.com</span>
             </p>
             <p>
               <span className="font-medium text-white">GitHub:</span>{' '}
               <a
-                href="https://github.com/yashsinha129"
+                href="https://github.com/vyash382"
                 className="text-blue-400 hover:underline transition-all duration-300"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                github.com/yashsinha129
+                github.com/vyash382
               </a>
             </p>
           </div>

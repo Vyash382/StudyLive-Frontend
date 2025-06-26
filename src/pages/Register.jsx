@@ -39,7 +39,7 @@ const Register = () => {
     formData.append('password', form.password);
     formData.append('file', form.profilePhoto); 
     const response = await axios.post(
-      'http://localhost:5000/api/user/register',
+      'https://studylive-backend.onrender.com/api/user/register',
       formData,
       {
         headers: {

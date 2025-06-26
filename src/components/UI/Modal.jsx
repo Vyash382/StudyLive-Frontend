@@ -30,7 +30,7 @@ const Modal = ({ toShow, onClose }) => {
       setLoading(true);
 
       const response = await axios.post(
-        'http://localhost:5000/api/user/searchUsers',
+        'https://studylive-backend.onrender.com/api/user/searchUsers',
         { query },
         {
           headers: {
@@ -61,7 +61,7 @@ const Modal = ({ toShow, onClose }) => {
       }
     })
     if(selected_user.status=="Add"){
-      const response = await axios.post('http://localhost:5000/api/friend/sendRequest',{
+      const response = await axios.post('https://studylive-backend.onrender.com/api/friend/sendRequest',{
         receiver : id
       },{
         headers:{
@@ -74,7 +74,7 @@ const Modal = ({ toShow, onClose }) => {
     }
     
     else if(selected_user.status=="Unfriend"){
-      const response = await axios.post('http://localhost:5000/api/friend/unfriend',{
+      const response = await axios.post('https://studylive-backend.onrender.com/api/friend/unfriend',{
         receiver : id
       },{
         headers:{

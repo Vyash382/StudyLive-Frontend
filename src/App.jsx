@@ -26,7 +26,7 @@ function App() {
 
       try {
         const response = await axios.post(
-          'http://localhost:5000/api/user/getDetails',
+          'https://studylive-backend.onrender.com/api/user/getDetails',
           {},
           {
             headers: {

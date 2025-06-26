@@ -26,7 +26,7 @@ const Login = () => {
     const { email, password } = form;
 
     try {
-      const loginResponse = await axios.post('http://localhost:5000/api/user/login', {
+      const loginResponse = await axios.post('https://studylive-backend.onrender.com/api/user/login', {
         email,
         password,
       });
@@ -40,7 +40,7 @@ const Login = () => {
       localStorage.setItem('token', token);
 
       const detailsResponse = await axios.post(
-        'http://localhost:5000/api/user/getDetails',
+        'https://studylive-backend.onrender.com/api/user/getDetails',
         {},
         {
           headers: {

@@ -15,7 +15,7 @@ export const SocketProvider = ({ user, children }) => {
       }
       return;
     }
-    const newSocket = io('http://localhost:5000', {
+    const newSocket = io('https://studylive-backend.onrender.com', {
       extraHeaders: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },

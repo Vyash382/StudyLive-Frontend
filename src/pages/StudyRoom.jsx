@@ -12,15 +12,19 @@ import {
   selectIsConnectedToRoom,
   selectPeers,
 } from '@100mslive/react-sdk';
+import { Menu } from 'lucide-react';
 
 const StudyRoom = () => {
   const [roomVariables, setRoomVariables] = useRecoilState(roomAtom);
   const [mode, setMode] = useState('pad');
+  const [showMenu, setShowMenu] = useState(false);
   const [textContent, setTextContent] = useState('');
   const [isEraser, setIsEraser] = useState(false);
   const [dummyMessages, setDummyMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isVideoOn, setIsVideoOn] = useState(true);
+  const [loading, setLoading] = useState(false);
+
   const socket = useSocket();
   const canvasRef = useRef();
   const messagesEndRef = useRef(null);
@@ -31,6 +35,7 @@ const StudyRoom = () => {
   const isConnected = useHMSStore(selectIsConnectedToRoom);
   const peers = useHMSStore(selectPeers);
   const [token, setToken] = useState('');
+  const [pathsBackup, setPathsBackup] = useState([]);
 
   useEffect(() => {
     if (!user || !roomVariables.room_id) {
@@ -38,7 +43,7 @@ const StudyRoom = () => {
     } else {
       axios
         .post(
-          'http://localhost:5000/api/conference/get-token',
+          'https://studylive-backend.onrender.com/api/conference/get-token',
           {
             room_id: roomVariables.room_id,
             role: roomVariables.role,
@@ -70,43 +75,33 @@ const StudyRoom = () => {
   useEffect(() => {
     if (socket && roomVariables.room_id) {
       socket.emit('join-room', roomVariables.room_id);
-
       socket.on('receive-drawing', async (data) => {
         try {
           await canvasRef.current.loadPaths(data);
+          setPathsBackup(data);
         } catch (err) {
           console.error('Failed to load drawing:', err);
         }
       });
-
-      socket.on('receive-text', (content) => {
-        setTextContent(content);
-      });
-
+      socket.on('receive-text', (content) => setTextContent(content));
       socket.on('send-group-messages', ({ sender, data }) => {
         setDummyMessages((prev) => [...prev, { senderId: sender, message: data }]);
       });
+      socket.on('user-left', () => {
+        
+      });
     }
-
     return () => {
       socket?.off('receive-drawing');
       socket?.off('receive-text');
       socket?.off('send-group-messages');
+      socket?.off('user-left');
     };
   }, [socket, roomVariables.room_id]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [dummyMessages]);
-
-  const toggleVideo = async () => {
-    try {
-      await hmsActions.setLocalVideoEnabled(!isVideoOn);
-      setIsVideoOn((prev) => !prev);
-    } catch (err) {
-      console.error('Toggle video error:', err);
-    }
-  };
 
   const formatTime = (secs) => {
     const m = Math.floor(secs / 60).toString().padStart(2, '0');
@@ -133,56 +128,53 @@ const StudyRoom = () => {
     setIsRunning(false);
   };
 
-  const clearCanvas = async () => {
-    try {
-      await canvasRef.current.clearCanvas();
-    } catch (err) {
-      console.error('Failed to clear canvas:', err);
-    }
-  };
-
   const toggleEraser = async () => {
-    try {
-      setIsEraser(true);
-      await canvasRef.current.eraseMode(true);
-    } catch (err) {
-      console.error('Failed to toggle eraser:', err);
-    }
+    setIsEraser(true);
+    await canvasRef.current.eraseMode(true);
   };
 
   const togglePen = async () => {
-    try {
-      setIsEraser(false);
-      await canvasRef.current.eraseMode(false);
-    } catch (err) {
-      console.error('Failed to toggle pen:', err);
-    }
+    setIsEraser(false);
+    await canvasRef.current.eraseMode(false);
   };
 
-  const onExit = async() => {
-    const len = peers.length;
-    console.log(len);
-    if(len==1){
-      await axios.post('http://localhost:5000/api/gemini/summary',{
-        group_id:roomVariables.group_id,
-        content:textContent
-      });
+  const clearCanvas = async () => {
+    await canvasRef.current.clearCanvas();
+    setPathsBackup([]);
+  };
+
+  const toggleVideo = async () => {
+    await hmsActions.setLocalVideoEnabled(!isVideoOn);
+    setIsVideoOn((prev) => !prev);
+  };
+
+  const onExit = async () => {
+    setLoading(true);
+    try {
+      if (peers.length === 1) {
+        await axios.post('https://studylive-backend.onrender.com/api/gemini/summary', {
+          group_id: roomVariables.group_id,
+          content: textContent
+        });
+      }
+      await hmsActions.leave();
+      setRoomVariables({ room_id: '', role: '' });
+      navigate('/');
+    } catch (err) {
+      console.error('Error on exit:', err);
+    } finally {
+      setLoading(false);
+      window.location.reload();
     }
-    hmsActions.leave();
-    setRoomVariables({ room_id: '', role: '' });
   };
 
   const handleSendMessage = () => {
     if (!inputMessage.trim()) return;
-
-    // Emit message to socket server
     socket.emit('send-group-messages', {
       roomId: roomVariables.room_id,
       sender: user.email,
       data: inputMessage,
     });
-
-    // Show it optimistically
     setDummyMessages([...dummyMessages, { senderId: 'me', message: inputMessage }]);
     setInputMessage('');
   };
@@ -194,120 +186,117 @@ const StudyRoom = () => {
   };
 
   const handleStroke = async () => {
-    try {
-      const paths = await canvasRef.current.exportPaths();
-      socket.emit('send-drawing', { roomId: roomVariables.room_id, data: paths });
-    } catch (err) {
-      console.error('Error exporting drawing paths:', err);
-    }
+    const paths = await canvasRef.current.exportPaths();
+    setPathsBackup(paths);
+    socket.emit('send-drawing', { roomId: roomVariables.room_id, data: paths });
   };
 
+  useEffect(() => {
+    if (mode === 'pad' && pathsBackup.length > 0 && canvasRef.current) {
+      canvasRef.current.loadPaths(pathsBackup).catch(console.error);
+    }
+  }, [mode]);
+
   return (
-    <div className="w-screen h-[calc(100vh-64px)] mt-16 bg-gray-950 text-white flex flex-col md:flex-row overflow-hidden">
-      {/* Left Side */}
-      <div className="w-full md:w-1/2 border-r border-gray-700 flex flex-col p-4 space-y-4 overflow-y-auto">
-        <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-between">
-          <div className="text-2xl font-mono">{formatTime(secondsLeft)}</div>
+    <div className="w-screen min-h-screen mt-16 bg-gray-950 text-white flex flex-col md:flex-row overflow-hidden">
+      {loading && <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 text-white text-xl">Saving summary...</div>}
+
+      <div className="w-full md:w-1/2 p-4 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="text-xl font-bold">{formatTime(secondsLeft)}</div>
           <div className="flex gap-2">
             <button onClick={startTimer} className="bg-green-600 px-3 py-1 rounded">Start</button>
             <button onClick={resetTimer} className="bg-red-600 px-3 py-1 rounded">Reset</button>
           </div>
-          <button className="text-gray-300 cursor-pointer hover:text-blue-400 font-medium" onClick={onExit}>
-            End Session
+          <button onClick={onExit} className="text-red-400 hover:underline">End</button>
+        </div>
+
+        <div className="md:hidden flex justify-between items-center">
+          <span className="text-lg">Tools</span>
+          <button onClick={() => setShowMenu(!showMenu)} className="bg-gray-800 p-2 rounded">
+            <Menu />
           </button>
         </div>
 
-        <div className="flex gap-4 mb-2">
-          <button className={`px-4 py-2 rounded-md ${mode === 'pad' ? 'bg-blue-500' : 'bg-gray-800'}`} onClick={() => setMode('pad')}>
-            Pad
-          </button>
-          <button className={`px-4 py-2 rounded-md ${mode === 'write' ? 'bg-blue-500' : 'bg-gray-800'}`} onClick={() => setMode('write')}>
-            Write
-          </button>
-        </div>
+        {(showMenu || window.innerWidth >= 768) && (
+          <div className="space-y-2">
+            <div className="flex gap-2">
+              <button className={`px-4 py-2 rounded ${mode === 'pad' ? 'bg-blue-600' : 'bg-gray-800'}`} onClick={() => setMode('pad')}>Pad</button>
+              <button className={`px-4 py-2 rounded ${mode === 'write' ? 'bg-blue-600' : 'bg-gray-800'}`} onClick={() => setMode('write')}>Write</button>
+            </div>
 
-        {mode === 'pad' && (
-          <div className="flex gap-2">
-            <button onClick={togglePen} className="px-3 py-1 bg-green-600 rounded">Pen</button>
-            <button onClick={toggleEraser} className="px-3 py-1 bg-yellow-600 rounded">Erase</button>
-            <button onClick={clearCanvas} className="px-3 py-1 bg-red-600 rounded">Clear</button>
+            {mode === 'pad' && (
+              <div className="flex gap-2">
+                <button onClick={togglePen} className="bg-green-600 px-3 py-1 rounded">Pen</button>
+                <button onClick={toggleEraser} className="bg-yellow-600 px-3 py-1 rounded">Erase</button>
+                <button onClick={clearCanvas} className="bg-red-600 px-3 py-1 rounded">Clear</button>
+              </div>
+            )}
+
+            <button onClick={toggleVideo} className="bg-purple-600 px-4 py-2 rounded">
+              {isVideoOn ? 'Turn Off Video' : 'Turn On Video'}
+            </button>
           </div>
         )}
 
-        <button onClick={toggleVideo} className="bg-purple-600 px-4 py-2 rounded-lg">
-          {isVideoOn ? 'Turn Off Video' : 'Turn On Video'}
-        </button>
-
-        <div className="flex-1 bg-gray-800 rounded-lg overflow-hidden relative">
-          <div className={`absolute top-0 left-0 w-full h-full ${mode === 'pad' ? 'block' : 'hidden'}`}>
+        <div className="h-[300px] md:h-[400px] bg-gray-800 rounded-lg overflow-hidden">
+          {mode === 'pad' ? (
             <ReactSketchCanvas
               ref={canvasRef}
               onStroke={handleStroke}
-              style={{ height: '100%', width: '100%' }}
               strokeWidth={4}
               strokeColor="white"
               canvasColor="#1f2937"
+              style={{ width: '100%', height: '100%' }}
             />
-          </div>
-          <textarea
-            placeholder="Start typing..."
-            value={textContent}
-            onChange={handleTextChange}
-            className={`absolute top-0 left-0 w-full h-full bg-gray-900 text-white p-4 rounded-lg resize-none outline-none ${mode === 'write' ? 'block' : 'hidden'}`}
-          />
+          ) : (
+            <textarea
+              value={textContent}
+              onChange={handleTextChange}
+              className="w-full h-full bg-gray-900 text-white p-4 resize-none outline-none"
+              placeholder="Start writing..."
+            />
+          )}
         </div>
       </div>
 
       {/* Right Side */}
-      <div className="w-full md:w-1/2 flex flex-col">
-        <div className="flex-1 border-b border-gray-700 p-4 flex flex-col overflow-y-auto">
-          <div className="font-semibold text-lg mb-2">Chat</div>
-          <div className="bg-gray-800 p-4 rounded-lg flex-1 text-gray-200 space-y-2 overflow-y-auto">
-            {dummyMessages.map((msg, idx) => (
-              <div
-                key={idx}
-                className={`px-4 py-2 rounded-xl max-w-[80%] ${msg.senderId === 'me' ? 'bg-blue-500 self-end text-white ml-auto' : 'bg-gray-700 self-start'}`}
-              >
-                <div className="text-xs mb-1 text-gray-300">
-                  {msg.senderId == user.email ? user.email : msg.senderId}
-                </div>
-                {msg.message}
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-          <div className="mt-2 flex gap-2">
-            <input
-              type="text"
-              placeholder="Type your message..."
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              className="flex-1 bg-gray-700 text-white p-2 rounded-lg outline-none"
-              onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-            />
-            <button onClick={handleSendMessage} className="bg-blue-500 px-4 py-2 rounded-lg hover:bg-blue-600">
-              Send
-            </button>
-          </div>
+      <div className="w-full md:w-1/2 p-4 flex flex-col gap-4">
+        <div className="flex-1 overflow-y-auto bg-gray-800 p-4 rounded">
+          <div className="text-lg font-semibold mb-2">Chat</div>
+          {dummyMessages.map((msg, idx) => (
+            <div key={idx} className={`p-2 rounded ${msg.senderId === 'me' ? 'bg-blue-600 self-end ml-auto text-white' : 'bg-gray-700'}`}>
+              <div className="text-xs text-gray-300">{msg.senderId}</div>
+              <div>{msg.message}</div>
+            </div>
+          ))}
+          <div ref={messagesEndRef} />
         </div>
 
-        <div className="flex-1 p-4 bg-gray-900 overflow-y-auto">
-          <div className="font-semibold text-lg mb-2 text-white">Participants</div>
-          <div className="grid grid-cols-2 gap-4 h-full">
+        <div className="flex gap-2">
+          <input
+            value={inputMessage}
+            onChange={(e) => setInputMessage(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+            placeholder="Type a message..."
+            className="flex-1 bg-gray-700 text-white p-2 rounded"
+          />
+          <button onClick={handleSendMessage} className="bg-blue-500 px-4 py-2 rounded">Send</button>
+        </div>
+
+        <div className="mt-4">
+          <div className="text-lg font-semibold mb-2">Participants</div>
+          <div className="grid grid-cols-2 gap-2">
             {peers.map((peer) => (
-              <div key={peer.id} className="relative bg-black rounded-lg overflow-hidden flex items-center justify-center">
+              <div key={peer.id} className="bg-black p-2 rounded text-center">
                 <video
-                  ref={(el) => {
-                    if (el && peer.videoTrack) {
-                      hmsActions.attachVideo(peer.videoTrack, el);
-                    }
-                  }}
+                  ref={(el) => el && peer.videoTrack && hmsActions.attachVideo(peer.videoTrack, el)}
                   autoPlay
                   muted={peer.isLocal}
                   playsInline
-                  className="w-full h-full object-cover"
+                  className="w-full h-32 object-cover rounded"
                 />
-                <p className="absolute bottom-2 left-0 right-0 text-center text-white text-sm">{peer.name}</p>
+                <p className="text-white text-sm mt-1">{peer.name}</p>
               </div>
             ))}
           </div>

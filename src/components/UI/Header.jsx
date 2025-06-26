@@ -10,7 +10,7 @@ import {
   Home,
   Clock,
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Modal from './Modal';
 import NotificationBox from '../Notifications/NotificationBox';
 import { useRecoilState } from 'recoil';
@@ -25,18 +25,11 @@ const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 
-  function handleLogin() {
-    navigate('/login');
-  }
-
-  function handleRegister() {
-    navigate('/register');
-  }
-
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem('token');
     setMenuOpen(false);
+    navigate('/');
   };
 
   return (
@@ -47,20 +40,16 @@ const Header = () => {
         <div className="hidden md:flex items-center space-x-6 text-gray-300">
           {user ? (
             <>
-              <button
-                className="hover:text-blue-400"
-                onClick={() => navigate('/')}
-              >
+              <Link to="/" className="hover:text-blue-400">
                 <Home size={22} />
-              </button>
+              </Link>
 
               <button
                 className="hover:text-blue-400"
-                onClick={() => setToShowSearch((prev) => !prev)}
+                onClick={() => setToShowSearch(true)}
               >
                 <Search size={22} />
               </button>
-              <Modal toShow={toShowSearch} onClose={setToShowSearch} />
 
               <div className="relative">
                 <button
@@ -69,36 +58,22 @@ const Header = () => {
                 >
                   <Bell size={22} />
                 </button>
-                <NotificationBox
-                  toShow={toShowNotifications}
-                  setToShow={setToShowNotifications}
-                />
               </div>
 
-              <button
-                className="hover:text-blue-400"
-                onClick={() => navigate('/chat')}
-              >
+              <Link to="/chat" className="hover:text-blue-400">
                 <MessageCircle size={22} />
-              </button>
+              </Link>
 
               <button
                 className="hover:text-blue-400"
-                onClick={() => closeHandlerConference(!closeConference)}
+                onClick={() => closeHandlerConference(true)}
               >
                 <Video size={22} />
               </button>
-              <RoomMembers
-                close={closeConference}
-                closeHandler={closeHandlerConference}
-              />
 
-              <button
-                className="hover:text-blue-400"
-                onClick={() => navigate('/previous')}
-              >
+              <Link to="/previous" className="hover:text-blue-400">
                 <Clock size={22} />
-              </button>
+              </Link>
 
               <button
                 onClick={handleLogout}
@@ -109,18 +84,18 @@ const Header = () => {
             </>
           ) : (
             <>
-              <p
-                onClick={handleLogin}
+              <Link
+                to="/login"
                 className="text-gray-300 cursor-pointer hover:text-blue-400 font-medium"
               >
                 Login
-              </p>
-              <p
-                onClick={handleRegister}
+              </Link>
+              <Link
+                to="/register"
                 className="text-gray-300 hover:text-blue-400 font-medium cursor-pointer"
               >
                 Register
-              </p>
+              </Link>
             </>
           )}
         </div>
@@ -136,14 +111,22 @@ const Header = () => {
       </div>
 
       {menuOpen && (
-        <div className="md:hidden bg-gray-800 px-4 pb-4 shadow text-gray-300">
+        <div className="md:hidden bg-gray-800 px-4 pb-4 shadow text-gray-300 pt-3">
           {user ? (
             <div className="flex flex-col space-y-3">
+              <Link
+                to="/"
+                className="flex items-center gap-2 hover:text-blue-400"
+                onClick={() => setMenuOpen(false)}
+              >
+                <Home size={20} /> Home
+              </Link>
+
               <button
                 className="flex items-center gap-2 hover:text-blue-400"
                 onClick={() => {
-                  setToShowSearch(true);
                   setMenuOpen(false);
+                  setToShowSearch(true);
                 }}
               >
                 <Search size={20} /> Search
@@ -152,42 +135,38 @@ const Header = () => {
               <button
                 className="flex items-center gap-2 hover:text-blue-400"
                 onClick={() => {
-                  setToShowNotifications(true);
                   setMenuOpen(false);
+                  setToShowNotifications(true);
                 }}
               >
                 <Bell size={20} /> Notifications
               </button>
 
-              <button
+              <Link
+                to="/chat"
                 className="flex items-center gap-2 hover:text-blue-400"
-                onClick={() => {
-                  navigate('/chat');
-                  setMenuOpen(false);
-                }}
+                onClick={() => setMenuOpen(false)}
               >
                 <MessageCircle size={20} /> Chat
-              </button>
+              </Link>
 
               <button
                 className="flex items-center gap-2 hover:text-blue-400"
                 onClick={() => {
-                  closeHandlerConference(true);
                   setMenuOpen(false);
+                  closeHandlerConference(true);
                 }}
               >
                 <Video size={20} /> Conference
               </button>
 
-              <button
+              <Link
+                to="/previous"
                 className="flex items-center gap-2 hover:text-blue-400"
-                onClick={() => {
-                  navigate('/previous');
-                  setMenuOpen(false);
-                }}
+                onClick={() => setMenuOpen(false)}
               >
                 <Clock size={20} /> Previous Sessions
-              </button>
+              </Link>
 
               <button
                 onClick={handleLogout}
@@ -198,22 +177,35 @@ const Header = () => {
             </div>
           ) : (
             <div className="flex flex-col space-y-3">
-              <a
-                href="/login"
+              <Link
+                to="/login"
                 className="text-gray-300 hover:text-blue-400 font-medium"
+                onClick={() => setMenuOpen(false)}
               >
                 Login
-              </a>
-              <a
-                href="/register"
+              </Link>
+              <Link
+                to="/register"
                 className="bg-blue-600 text-white px-4 py-2 text-center rounded hover:bg-blue-700 transition"
+                onClick={() => setMenuOpen(false)}
               >
                 Register
-              </a>
+              </Link>
             </div>
           )}
         </div>
       )}
+
+      {/* Global Modals */}
+      <Modal toShow={toShowSearch} onClose={setToShowSearch} />
+      <NotificationBox
+        toShow={toShowNotifications}
+        setToShow={setToShowNotifications}
+      />
+      <RoomMembers
+        close={closeConference}
+        closeHandler={closeHandlerConference}
+      />
     </header>
   );
 };

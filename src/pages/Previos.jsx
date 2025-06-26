@@ -17,7 +17,7 @@ const PreviousSessionsPage = () => {
     async function fetchSessions() {
       try {
         const response = await axios.post(
-          'http://localhost:5000/api/conference/get-previous',
+          'https://studylive-backend.onrender.com/api/conference/get-previous',
           {},
           {
             headers: {
