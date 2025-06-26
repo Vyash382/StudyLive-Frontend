@@ -14,6 +14,7 @@ import { roomAtom } from './recoils/roomAtom';
 import Invitation from './components/RoomMembers/Invititation';
 import InvitationHandler from './components/RoomMembers/InvitationHandler';
 import { HMSRoomProvider } from '@100mslive/react-sdk';
+import PreviousSessionsPage from './pages/Previos';
 function App() {
   const [user, setUser] = useRecoilState(userAtom);
   const [roomVariables,setRoomVariables] = useRecoilState(roomAtom);
@@ -60,6 +61,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/chat/:chatId" element={<ChatPage />} />
+        <Route path="/previous" element={<PreviousSessionsPage />} />
         {roomVariables.room_id?<Route path="/studyroom" element={<StudyRoom />} />:<Route path="/" element={<About />} />}
       </Routes>
     </BrowserRouter>

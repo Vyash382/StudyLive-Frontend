@@ -8,6 +8,7 @@ import {
   X,
   LogOut,
   Home,
+  Clock,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Modal from './Modal';
@@ -19,8 +20,8 @@ import RoomMembers from '../RoomMembers/RoomMembers';
 const Header = () => {
   const [toShowSearch, setToShowSearch] = useState(false);
   const [toShowNotifications, setToShowNotifications] = useState(false);
-  const [user,setUser] = useRecoilState(userAtom);
-  const [closeConference,closeHandlerConference] = useState(false);
+  const [user, setUser] = useRecoilState(userAtom);
+  const [closeConference, closeHandlerConference] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -29,7 +30,7 @@ const Header = () => {
   }
 
   function handleRegister() {
-    navigate('register');
+    navigate('/register');
   }
 
   const handleLogout = () => {
@@ -44,7 +45,7 @@ const Header = () => {
         <div className="text-2xl font-bold text-white">StudyLive</div>
 
         <div className="hidden md:flex items-center space-x-6 text-gray-300">
-          {user  ? (
+          {user ? (
             <>
               <button
                 className="hover:text-blue-400"
@@ -80,13 +81,25 @@ const Header = () => {
               >
                 <MessageCircle size={22} />
               </button>
+
               <button
                 className="hover:text-blue-400"
                 onClick={() => closeHandlerConference(!closeConference)}
               >
                 <Video size={22} />
               </button>
-              <RoomMembers close={closeConference} closeHandler={closeHandlerConference} />
+              <RoomMembers
+                close={closeConference}
+                closeHandler={closeHandlerConference}
+              />
+
+              <button
+                className="hover:text-blue-400"
+                onClick={() => navigate('/previous')}
+              >
+                <Clock size={22} />
+              </button>
+
               <button
                 onClick={handleLogout}
                 className="hover:text-red-500 flex items-center gap-1"
@@ -124,20 +137,58 @@ const Header = () => {
 
       {menuOpen && (
         <div className="md:hidden bg-gray-800 px-4 pb-4 shadow text-gray-300">
-          {user === '1' ? (
+          {user ? (
             <div className="flex flex-col space-y-3">
-              <button className="flex items-center gap-2 hover:text-blue-400">
+              <button
+                className="flex items-center gap-2 hover:text-blue-400"
+                onClick={() => {
+                  setToShowSearch(true);
+                  setMenuOpen(false);
+                }}
+              >
                 <Search size={20} /> Search
               </button>
-              <button className="flex items-center gap-2 hover:text-blue-400">
+
+              <button
+                className="flex items-center gap-2 hover:text-blue-400"
+                onClick={() => {
+                  setToShowNotifications(true);
+                  setMenuOpen(false);
+                }}
+              >
                 <Bell size={20} /> Notifications
               </button>
-              <button className="flex items-center gap-2 hover:text-blue-400">
+
+              <button
+                className="flex items-center gap-2 hover:text-blue-400"
+                onClick={() => {
+                  navigate('/chat');
+                  setMenuOpen(false);
+                }}
+              >
                 <MessageCircle size={20} /> Chat
               </button>
-              <button className="flex items-center gap-2 hover:text-blue-400">
+
+              <button
+                className="flex items-center gap-2 hover:text-blue-400"
+                onClick={() => {
+                  closeHandlerConference(true);
+                  setMenuOpen(false);
+                }}
+              >
                 <Video size={20} /> Conference
               </button>
+
+              <button
+                className="flex items-center gap-2 hover:text-blue-400"
+                onClick={() => {
+                  navigate('/previous');
+                  setMenuOpen(false);
+                }}
+              >
+                <Clock size={20} /> Previous Sessions
+              </button>
+
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-2 hover:text-red-500"

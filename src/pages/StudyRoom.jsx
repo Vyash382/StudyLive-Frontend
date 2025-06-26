@@ -161,6 +161,7 @@ const StudyRoom = () => {
 
   const onExit = async() => {
     const len = peers.length;
+    console.log(len);
     if(len==1){
       await axios.post('http://localhost:5000/api/gemini/summary',{
         group_id:roomVariables.group_id,
