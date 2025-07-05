@@ -7,6 +7,7 @@ import { roomAtom } from '../../recoils/roomAtom';
 
 const RoomMembers = ({ close, closeHandler }) => {
   const navigate = useNavigate()
+  const [user,setUser] = useRecoilState(userAtom);
   const [friends, setFriends] = useState([]);
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [roomName, setRoomName] = useState('');
@@ -24,12 +25,13 @@ const RoomMembers = ({ close, closeHandler }) => {
           }
         );
         setFriends(response.data.friends);
+        console.log(response.data.friends);
       } catch (err) {
         console.error('Failed to fetch friends', err);
       }
     }
     get_friends();
-  }, []);
+  },[user]);
 
   const toggleMember = (friendId) => {
     setSelectedMembers((prev) =>

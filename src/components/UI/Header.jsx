@@ -92,7 +92,7 @@ const Header = () => {
               </Link>
               <Link
                 to="/register"
-                className="text-gray-300 hover:text-blue-400 font-medium cursor-pointer"
+                className="text-black-300 hover:text-blue-400 font-medium cursor-pointer"
               >
                 Register
               </Link>
@@ -186,7 +186,7 @@ const Header = () => {
               </Link>
               <Link
                 to="/register"
-                className="bg-blue-600 text-white px-4 py-2 text-center rounded hover:bg-blue-700 transition"
+                className="text-gray-300 hover:text-blue-400 font-medium"
                 onClick={() => setMenuOpen(false)}
               >
                 Register

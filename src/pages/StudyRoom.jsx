@@ -23,6 +23,7 @@ const StudyRoom = () => {
   const [dummyMessages, setDummyMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isVideoOn, setIsVideoOn] = useState(true);
+  const [isAudioOn, setIsAudioOn] = useState(true); // <-- added
   const [loading, setLoading] = useState(false);
 
   const socket = useSocket();
@@ -87,9 +88,7 @@ const StudyRoom = () => {
       socket.on('send-group-messages', ({ sender, data }) => {
         setDummyMessages((prev) => [...prev, { senderId: sender, message: data }]);
       });
-      socket.on('user-left', () => {
-        
-      });
+      socket.on('user-left', () => {});
     }
     return () => {
       socket?.off('receive-drawing');
@@ -146,6 +145,11 @@ const StudyRoom = () => {
   const toggleVideo = async () => {
     await hmsActions.setLocalVideoEnabled(!isVideoOn);
     setIsVideoOn((prev) => !prev);
+  };
+
+  const toggleAudio = async () => {
+    await hmsActions.setLocalAudioEnabled(!isAudioOn);
+    setIsAudioOn((prev) => !prev);
   };
 
   const onExit = async () => {
@@ -235,6 +239,9 @@ const StudyRoom = () => {
 
             <button onClick={toggleVideo} className="bg-purple-600 px-4 py-2 rounded">
               {isVideoOn ? 'Turn Off Video' : 'Turn On Video'}
+            </button>
+            <button onClick={toggleAudio} className="bg-pink-600 px-4 py-2 rounded">
+              {isAudioOn ? 'Mute Audio' : 'Unmute Audio'}
             </button>
           </div>
         )}
