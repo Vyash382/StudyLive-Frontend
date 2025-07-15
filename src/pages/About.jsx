@@ -1,8 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-import Invitation from '../components/RoomMembers/Invititation';
-import { tr } from 'framer-motion/client';
+import { Mail, Github, Info, Users, Code2, BookOpenCheck } from 'lucide-react';
 
 const fadeIn = {
   hidden: { opacity: 0, y: 40 },
@@ -10,118 +8,119 @@ const fadeIn = {
     opacity: 1,
     y: 0,
     transition: {
-      delay: i * 0.2,
-      duration: 0.6,
+      delay: i * 0.15,
+      duration: 0.5,
       ease: 'easeOut',
     },
   }),
 };
 
 const About = () => {
-    
   return (
-
-    <div className="w-full bg-gray-900 text-gray-100 pt-20 px-4 pb-16">
-      
-      <div className=" mx-auto w-full space-y-24">
-
-        {/* About StudyLive Section */}
-        <motion.section
+    <div className="w-full bg-gray-900 text-gray-100 pt-20 px-6 pb-16 min-h-screen">
+      <div className="max-w-6xl mx-auto space-y-20">
+        
+        {/* Section: About StudyLive */}
+        <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
           variants={fadeIn}
         >
-          <h1 className="text-4xl md:text-5xl font-bold text-blue-400 mb-4 border-b border-gray-700 pb-2 transition-all duration-500">
+          <h1 className="text-4xl md:text-5xl font-bold text-blue-400 mb-6 border-b border-gray-700 pb-3">
             About StudyLive
           </h1>
-          <p className="text-lg leading-relaxed text-gray-300 transition-opacity duration-300 hover:opacity-90">
-            <strong>StudyLive</strong> is a real-time collaborative study platform created to empower students and learners to stay focused, engaged, and connected. It helps people build consistent study habits using features like:
-          </p>
-          <ul className="list-disc ml-6 mt-4 space-y-2 text-gray-300">
+          <div className="grid md:grid-cols-2 gap-6">
             {[
               '🎯 Study Rooms with Pomodoro-style timers',
-              '🧑‍🤝‍🧑 Friend System to send/accept requests and study together',
-              '📝 Collaborative Whiteboard to solve problems visually',
-              '🎥 Video Conferencing via 100ms integration',
-              '💬 Chat: one-on-one & group messaging with notifications',
-              '🧠 AI-Powered Summary after each session using Gemini API',
-              '🗃 Session History & Media saved securely with PostgreSQL and Cloudinary',
-            ].map((item, idx) => (
-              <motion.li
-                key={idx}
-                custom={idx}
+              '🧑‍🤝‍🧑 Friend System for collaborative focus',
+              '📝 Whiteboard for real-time visual problem solving',
+              '🎥 Video Conferencing via 100ms',
+              '💬 Real-time Chat (DMs & Groups)',
+              '🧠 AI Summary using Gemini API after each session',
+              '🗃 Session history & media stored with PostgreSQL & Cloudinary',
+            ].map((feature, i) => (
+              <motion.div
+                key={i}
+                custom={i}
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
                 variants={fadeIn}
-                className="hover:text-blue-300 transition-colors duration-300"
+                className="bg-gray-800 hover:bg-gray-700 p-4 rounded-xl shadow transition"
               >
-                <strong>{item}</strong>
-              </motion.li>
+                <p className="text-base text-gray-300">{feature}</p>
+              </motion.div>
             ))}
-          </ul>
-          <p className="mt-4 text-lg text-gray-300">
-            StudyLive aims to eliminate isolation from online learning and bring collaboration, discipline, and fun to remote study.
+          </div>
+          <p className="mt-6 text-lg text-gray-300">
+            <span className="font-semibold text-white">StudyLive</span> aims to eliminate the isolation of online learning and bring back motivation, collaboration, and routine to your study sessions.
           </p>
-        </motion.section>
+        </motion.div>
 
-        {/* About Developer Section */}
-        <motion.section
+        {/* Section: Developer Card */}
+        <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
           variants={fadeIn}
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-blue-400 mb-4 border-b border-gray-700 pb-2">
+          <h2 className="text-4xl md:text-5xl font-bold text-blue-400 mb-6 border-b border-gray-700 pb-3">
             About the Developer
           </h2>
-          <p className="text-lg leading-relaxed text-gray-300">
-            I'm <strong>Yash Sinha</strong>, a full-stack developer. With a strong foundation in both programming and analytical thinking, I enjoy building meaningful applications that solve real-world problems.
-          </p>
-          <p className="mt-4 text-lg text-gray-300">
-            <span className="font-semibold text-white">Technical interests:</span> Real-time systems, collaborative tools, performance optimization, and educational tech.
-          </p>
-          <p className="mt-4 text-lg text-gray-300">
-            <span className="font-semibold text-white">Tech stack used in StudyLive:</span> React, Tailwind CSS, Recoil, WebSockets, 100ms, PostgreSQL, Express, Cloudinary, Multer, Gemini API, and more.
-          </p>
-          <p className="mt-4 text-lg text-gray-300">
-            I believe in learning by building. My vision with StudyLive is to help learners feel connected, motivated, and effective—especially when self-studying.
-          </p>
-        </motion.section>
+          <motion.div className="bg-gray-800 rounded-xl p-6 shadow-md space-y-4 hover:bg-gray-700 transition">
+            <div className="flex items-center gap-3 text-blue-300 text-lg font-semibold">
+              <Info size={20} /> Yash Sinha
+            </div>
+            <p className="text-gray-300">
+              I'm a passionate <strong>full-stack developer</strong> focused on building meaningful and collaborative tools for learners.
+            </p>
+            <p className="text-gray-300">
+              <span className="text-white font-semibold">Tech Interests:</span> real-time systems, performance, productivity tools, and educational tech.
+            </p>
+            <p className="text-gray-300">
+              <span className="text-white font-semibold">Tech Stack:</span> React, Tailwind CSS, Recoil, WebSockets, PostgreSQL, Express, Cloudinary, 100ms, Gemini API, and more.
+            </p>
+            <p className="text-gray-300">
+              I believe in <span className="text-white font-semibold">learning by building</span> and love turning ideas into functional experiences.
+            </p>
+          </motion.div>
+        </motion.div>
 
-        {/* Contact Section */}
-        <motion.section
+        {/* Section: Contact Card */}
+        <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
           variants={fadeIn}
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-blue-400 mb-4 border-b border-gray-700 pb-2">
+          <h2 className="text-4xl md:text-5xl font-bold text-blue-400 mb-6 border-b border-gray-700 pb-3">
             Contact
           </h2>
-          <p className="text-lg text-gray-300">
-            Want to collaborate or give feedback? Feel free to reach out via email or connect on GitHub.
-          </p>
-          <div className="mt-4 space-y-2 text-gray-300">
-            <p>
-              <span className="font-medium text-white">Email:</span>{' '}
-              <span className="transition-all hover:text-blue-400">vyash382@gmail.com</span>
-            </p>
-            <p>
-              <span className="font-medium text-white">GitHub:</span>{' '}
-              <a
-                href="https://github.com/vyash382"
-                className="text-blue-400 hover:underline transition-all duration-300"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                github.com/vyash382
-              </a>
-            </p>
+          <div className="grid md:grid-cols-2 gap-6">
+            <motion.div className="bg-gray-800 p-5 rounded-xl flex items-center gap-4 hover:bg-gray-700 transition">
+              <Mail size={24} className="text-blue-400" />
+              <div>
+                <p className="text-white font-medium">Email</p>
+                <p className="text-gray-300">vyash382@gmail.com</p>
+              </div>
+            </motion.div>
+            <motion.div className="bg-gray-800 p-5 rounded-xl flex items-center gap-4 hover:bg-gray-700 transition">
+              <Github size={24} className="text-blue-400" />
+              <div>
+                <p className="text-white font-medium">GitHub</p>
+                <a
+                  href="https://github.com/vyash382"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:underline"
+                >
+                  github.com/vyash382
+                </a>
+              </div>
+            </motion.div>
           </div>
-        </motion.section>
-
+        </motion.div>
       </div>
     </div>
   );

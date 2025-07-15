@@ -10,7 +10,7 @@ import {
   Home,
   Clock,
 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Modal from './Modal';
 import NotificationBox from '../Notifications/NotificationBox';
 import { useRecoilState } from 'recoil';
@@ -18,6 +18,11 @@ import { userAtom } from '../../recoils/userAtom';
 import RoomMembers from '../RoomMembers/RoomMembers';
 
 const Header = () => {
+  const location = useLocation();
+
+  // ✅ Hide header when in StudyRoom route
+  if (location.pathname.startsWith('/studyroom')) return null;
+
   const [toShowSearch, setToShowSearch] = useState(false);
   const [toShowNotifications, setToShowNotifications] = useState(false);
   const [user, setUser] = useRecoilState(userAtom);
